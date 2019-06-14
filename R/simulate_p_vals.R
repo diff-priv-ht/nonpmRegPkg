@@ -11,6 +11,8 @@
 #' @param ... Additional options for \code{p_value_function}
 #'
 #' @return Will return a vector of p-values
+#'
+#' @export
 simulate_p_vals <- function(nsims, X, true_betas, sigma,
                                  p_value_function = compute_p_value, ...){
   mean_mat <- X %*% true_betas

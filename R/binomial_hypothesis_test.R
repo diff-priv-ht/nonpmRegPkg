@@ -6,6 +6,8 @@
 #' @param m,b,q the parameters of the Tulap distribution; described in Awan and
 #'   Slavkovic (2018).
 #' @return a vector of length \code{n}.
+#'
+#' @export
 rtulap <- function(n, m, b, q) {
   vect <- rep(NA, n)
   G1 <- rgeom(n, 1 - b)
@@ -20,6 +22,8 @@ rtulap <- function(n, m, b, q) {
 #'
 #' @param m,b,q the parameters of the Tulap distribution; described in Awan and
 #'   Slavkovic (2018)
+#'
+#' @export
 tulap_cdf <- function(m, b, x) {
   if (x <= round(m)) {
     (b ^ (- round(x-m))/ (1 + b)) * (b + (x - m - round(x - m) + 1/2) * (1 - b))
@@ -33,6 +37,8 @@ tulap_cdf <- function(m, b, x) {
 #'
 #' @param X data from a binomial distribution - typically the number of successes.
 #' @param epsilon the privacy parameter.
+#'
+#' @export
 Calculate_Z <- function(X, epsilon) {
   Z <- rtulap(1, X, exp(-epsilon), 0)
   return(Z)}
@@ -47,6 +53,8 @@ Calculate_Z <- function(X, epsilon) {
 #' @param epsilon privacy parameter.
 #' @param Z privatized number of successes.
 #' @return outputs the p-value of the hypothesis test.
+#'
+#' @export
 DP_Binom_test_oneside <- function(n, theta_0, epsilon, Z) {
   F_underbar <- 0:n %>%
     map_dbl(~ tulap_cdf(0, exp(-epsilon), .x - Z))
@@ -64,6 +72,8 @@ DP_Binom_test_oneside <- function(n, theta_0, epsilon, Z) {
 #' @param epsilon privacy parameter.
 #' @param Z privatized number of successes.
 #' @return outputs the p-value of the hypothesis test.
+#'
+#' @export
 DP_Binom_test_twoside <- function(n, theta_0, epsilon, Z) {
   T_stat <- abs(Z - n * theta_0)
   p1 <- DP_Binom_test_oneside(n, theta_0, epsilon, T_stat + n * theta_0)

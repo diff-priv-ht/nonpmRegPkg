@@ -9,6 +9,8 @@
 #' @param beta_number The regression coefficient for which to calculate the
 #'   p-value. Numering begins at zero (the intercept).
 #' @return The output will be a double
+#'
+#' @export
 compute_p_value <- function(df, M, epsilon, beta_number){
   n <- nrow(df)
   groups <- sample(rep(1:M, ceiling(n/M))[1:n])
