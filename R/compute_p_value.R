@@ -10,6 +10,9 @@
 #'   p-value. Numering begins at zero (the intercept).
 #' @return The output will be a double
 #'
+#' @importFrom purrr map_dbl
+#' @importFrom magrittr %>%
+#'
 #' @export
 compute_p_value <- function(df, M, epsilon, beta_number){
   n <- nrow(df)

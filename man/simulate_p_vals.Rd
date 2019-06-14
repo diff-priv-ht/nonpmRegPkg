@@ -4,7 +4,7 @@
 \alias{simulate_p_vals}
 \title{Repeatedly simulate a p-value computation.}
 \usage{
-simulate_p_vals(nsims, X, true_betas, sigma,
+simulate_p_vals(nsims, X, true_betas, sigma, M, epsilon, beta_number,
   p_value_function = compute_p_value, ...)
 }
 \arguments{
@@ -17,12 +17,19 @@ length as the number of columns of \code{X}.}
 
 \item{sigma}{Standard deviation of the error in the regression.}
 
-\item{p_value_function}{Function to use to compute the p-values}
+\item{M}{The number of subsamples when computing p-value.}
 
-\item{...}{Additional options for \code{p_value_function}}
+\item{epsilon}{The privacy parameter.}
+
+\item{beta_number}{The regression coefficient for which to calculate the
+p-value. Numering begins at zero (the intercept).}
+
+\item{p_value_function}{Function to use to compute the p-values.}
+
+\item{...}{Additional options for \code{p_value_function}.}
 }
 \value{
-Will return a vector of p-values
+Will return a vector of p-values.
 }
 \description{
 Simulate a p-value computation many times using choice of computation method
