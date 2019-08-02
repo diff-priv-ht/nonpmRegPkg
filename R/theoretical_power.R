@@ -35,56 +35,6 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
            (1 - cdf_Z(as.double(critical_values[2]))))
 }
 
-#' Proportion below threshold for linear regression
-#'
-#' Function that computes the proportion of the p-values below a pre-determined
-#' threshold, theta_0, for a given subsample of a design matrix in a regression.
-#'
-#' @param num The index of the subsample of interest.
-#' @param X A design matrix for a regression. Must have at least two explanatory
-#'   variables.
-#' @param groups A vector of length \code{nrow(X)} with the index of the group
-#'   of each row in \code{X}.
-#' @param effect_size The quotient of the parameter of interest (beta) and the standard
-#'   deviation of the noise (sigma).
-#' @param theta_0 The threshold
-#' @return The output will be a double between 0 and 1.
-#'
-#' @importFrom stats qt
-#' @importFrom stats pt
-#'
-#' @export
-compute_prop_below_threshold_lm <- function(num, X, groups, effect_size, theta_0){
-  X_ <- X[groups == num,]
-  df <- nrow(X_) - ncol(X_)
-  ncp <- effect_size/sqrt(solve(t(X_) %*% X_)[2,2])
-
-  return(pt(qt(theta_0/2, df = df), df = df, ncp = ncp) +
-           1 - pt(qt(1 - theta_0/2, df = df), df = df, ncp = ncp))
-}
-
-#' Proportion below threshold for normal test
-#'
-#' Function that computes the proportion of the p-values below a pre-determined
-#' threshold, theta_0, for a test of the mean of multivariate normal data.
-#'
-#' @param n The number of observations (number of rows in the database).
-#' @param d The number of dimensions (number of columns in the database).
-#' @param effect_size Determines the mean of the alternate distribution (which
-#'   will be `d` repetitions of `effect_size`).
-#' @param theta_0 The threshold
-#' @return The output will be a double between 0 and 1.
-#'
-#' @importFrom stats qchisq
-#' @importFrom stats pchisq
-#'
-#' @export
-compute_prop_below_threshold_normal <- function(n, d, effect_size, theta_0){
-  lambda = n*d*effect_size^2
-
-  return(1-pchisq(qchisq(1-theta_0, df = d), df = d, ncp = lambda))
-}
-
 #' Theoretical power of our test
 #'
 #' Function that computes the power of our test for a given a design matrix and
@@ -117,14 +67,15 @@ theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL, M,
                               effect_size, alpha, epsilon, nsims, theta_0,
                               test = "Linear Regression"){
   if(test == "Linear Regression"){
-    thetas <- map_dbl(.x = 1:M, .f = compute_prop_below_threshold_lm, X = X,
-          groups = groups, effect_size = effect_size, theta_0 = theta_0)
+    X_list <- map(.x = 1:M, .f = function(j){X[groups == j,]})
+    thetas <- map_dbl(.x = X_list, .f = public_power_lm, effect_size = effect_size,
+                      alpha = theta_0)
   }
   if(test == "Normal"){
-    sizes <- c(rep(ceiling(n/M), n - floor(n/M)*M),
-                rep(floor(n/M), M - n + floor(n/M)*M))
-    thetas <- map_dbl(.x = sizes, .f = compute_prop_below_threshold_normal,
-                      d = d, effect_size = effect_size, theta_0 = theta_0)
+    pub_pows <- map_dbl(.x = c(ceiling(n/M), floor(n/M)), .f = public_power_normal,
+                        d = d, effect_size = effect_size, alpha = theta_0)
+    thetas <- c(rep(pub_pows[1], n - floor(n/M)*M),
+                rep(pub_pows[2], M - n + floor(n/M)*M))
   }
   compute_binom_power(alpha = alpha , M = M, thetas = thetas, theta_0 = theta_0,
                       epsilon = epsilon, nsims = nsims)
