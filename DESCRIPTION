@@ -1,11 +1,15 @@
 Package: nonpmRegPkg
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Implementation of Functions for "Test of Tests"
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Zeki Kazan, Kaiyan Shi, Andrew Bray, and Adam Groce
+Maintainer: Zeki Kazan <kazanz@reed.edu>
+Description: This package includes all of the code needed to produce the graphs 
+displayed in the paper "Test of Tests." The functions that produce the power of 
+our test are `theoretical_power` and _____. The functions that implement the tests
+of Barrientos et al. and Canonne et al. are ______ and _____, respectively.
+    The code to optimize the parameters of our test and produce the plots is included
+in...
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
