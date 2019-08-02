@@ -61,6 +61,7 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
 #' @return The output will be a double between 0 and 1.
 #'
 #' @importFrom purrr map_dbl
+#' @importFrom purrr map
 #'
 #' @export
 theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL, M,
