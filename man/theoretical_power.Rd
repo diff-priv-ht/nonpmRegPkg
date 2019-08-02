@@ -4,15 +4,22 @@
 \alias{theoretical_power}
 \title{Compute the theoretical power of our test}
 \usage{
-theoretical_power(X, groups, M, effect_size, alpha, epsilon, nsims,
-  theta_0)
+theoretical_power(X = NULL, groups = NULL, n = NULL, d = NULL, M,
+  effect_size, alpha, epsilon, nsims, theta_0,
+  test = "Linear Regression")
 }
 \arguments{
-\item{X}{A design matrix for a regression. Must have at least two explanatory
+\item{X}{For regression only. A design matrix with at least two explanatory
 variables.}
 
-\item{groups}{A vector of length \code{nrow(X)} with the index of the group
-of each row in \code{X}.}
+\item{groups}{For regression only. A vector of length \code{nrow(X)} with the
+index of the group of each row in \code{X}.}
+
+\item{n}{For normal test only. The number of observations (number of rows in
+the database).}
+
+\item{d}{For normal test only. The number of dimensions (number of columns in
+the database).}
 
 \item{M}{The number of subsamples to partition the data into.}
 
@@ -27,6 +34,9 @@ standard deviation of the noise (sigma).}
 compute the reference distribution.}
 
 \item{theta_0}{The threshold.}
+
+\item{test}{The test to compute the power of. Either "Linear Regression" or
+"Normal"}
 }
 \value{
 The output will be a double between 0 and 1.
