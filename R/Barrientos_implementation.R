@@ -91,13 +91,14 @@ p_val_Barr <- function(df, groups, M, a_vector, epsilon, cdfs){
 #' @param a_vector Vector of truncation levels.
 #' @param alpha The significance level.
 #'
-#' @return Will return a vector of p-values.
+#' @return Will return a vector of powers of the same length as `a_vector`,
+#'   where output corresponds to the power with that level of truncation.
 #'
 #' @importFrom purrr map
 #' @importFrom purrr transpose
 #'
 #' @export
-PowerGen_Barr <- function(X, groups, M, a_vector, effect_size, alpha, epsilon, nsims,
+Barrientos_power <- function(X, groups, M, a_vector, effect_size, alpha, epsilon, nsims,
                           reps){
   n <- nrow(X)
   p <- ncol(X)
