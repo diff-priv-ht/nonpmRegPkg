@@ -16,6 +16,8 @@
 #'
 #' @return Will return a vector of p-values.
 #'
+#' @importFrom stats rnorm
+#'
 #' @export
 simulate_p_vals <- function(nsims, X, true_betas, sigma, M, epsilon, beta_number,
                                  p_value_function = compute_p_value, ...){

@@ -2,7 +2,7 @@
 % Please edit documentation in R/theoretical_power.R
 \name{compute_prop_below_threshold_normal}
 \alias{compute_prop_below_threshold_normal}
-\title{Compute proportion below the threshold for the normal test}
+\title{Proportion below threshold for normal test}
 \usage{
 compute_prop_below_threshold_normal(n, d, effect_size, theta_0)
 }
@@ -21,6 +21,5 @@ The output will be a double between 0 and 1.
 }
 \description{
 Function that computes the proportion of the p-values below a pre-determined
-threshold, theta_0, for a given subsample of a design matrix in a test of the
-mean of multivariate normal data.
+threshold, theta_0, for a test of the mean of multivariate normal data.
 }

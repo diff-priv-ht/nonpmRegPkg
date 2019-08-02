@@ -2,7 +2,7 @@
 % Please edit documentation in R/theoretical_power.R
 \name{compute_prop_below_threshold_lm}
 \alias{compute_prop_below_threshold_lm}
-\title{Compute proportion below the threshold for linear regression}
+\title{Proportion below threshold for linear regression}
 \usage{
 compute_prop_below_threshold_lm(num, X, groups, effect_size, theta_0)
 }

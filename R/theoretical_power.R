@@ -1,4 +1,4 @@
-#' Compute power of private binomial test
+#' Power of private binomial test
 #'
 #' Function that computes the power of the (two-sided) differentially private
 #' binomial test, adapted from Awan and Slavkovic (2019).
@@ -13,14 +13,14 @@
 #'   compute the reference distribution.
 #' @return The output will be a double between 0 and 1.
 #'
-#' @importFrom purrr map_dbl
-#' @importFrom magrittr %>%
 #' @importFrom poibin dpoibin
+#' @importFrom stats quantile
+#' @importFrom stats rbinom
 #'
 #' @export
 compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
   critical_values <- rbinom(nsims, M, theta_0) %>%
-    rtulap(nsims, ., exp(-epsilon), 0) %>%
+    rtulap(n = nsims, b = exp(-epsilon), q = 0) %>%
     quantile(c(alpha/2, 1- alpha/2))
 
   cdf_Z <- function(x){
@@ -35,7 +35,7 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
            (1 - cdf_Z(as.double(critical_values[2]))))
 }
 
-#' Compute proportion below the threshold for linear regression
+#' Proportion below threshold for linear regression
 #'
 #' Function that computes the proportion of the p-values below a pre-determined
 #' threshold, theta_0, for a given subsample of a design matrix in a regression.
@@ -50,6 +50,9 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
 #' @param theta_0 The threshold
 #' @return The output will be a double between 0 and 1.
 #'
+#' @importFrom stats qt
+#' @importFrom stats pt
+#'
 #' @export
 compute_prop_below_threshold_lm <- function(num, X, groups, effect_size, theta_0){
   X_ <- X[groups == num,]
@@ -60,11 +63,10 @@ compute_prop_below_threshold_lm <- function(num, X, groups, effect_size, theta_0
            1 - pt(qt(1 - theta_0/2, df = df), df = df, ncp = ncp))
 }
 
-#' Compute proportion below the threshold for the normal test
+#' Proportion below threshold for normal test
 #'
 #' Function that computes the proportion of the p-values below a pre-determined
-#' threshold, theta_0, for a given subsample of a design matrix in a test of the
-#' mean of multivariate normal data.
+#' threshold, theta_0, for a test of the mean of multivariate normal data.
 #'
 #' @param n The number of observations (number of rows in the database).
 #' @param d The number of dimensions (number of columns in the database).
@@ -73,6 +75,9 @@ compute_prop_below_threshold_lm <- function(num, X, groups, effect_size, theta_0
 #' @param theta_0 The threshold
 #' @return The output will be a double between 0 and 1.
 #'
+#' @importFrom stats qchisq
+#' @importFrom stats pchisq
+#'
 #' @export
 compute_prop_below_threshold_normal <- function(n, d, effect_size, theta_0){
   lambda = n*d*effect_size^2
@@ -80,7 +85,7 @@ compute_prop_below_threshold_normal <- function(n, d, effect_size, theta_0){
   return(1-pchisq(qchisq(1-theta_0, df = d), df = d, ncp = lambda))
 }
 
-#' Compute the theoretical power of our test
+#' Theoretical power of our test
 #'
 #' Function that computes the power of our test for a given a design matrix and
 #' a given partitioning into subsamples.
@@ -106,7 +111,6 @@ compute_prop_below_threshold_normal <- function(n, d, effect_size, theta_0){
 #' @return The output will be a double between 0 and 1.
 #'
 #' @importFrom purrr map_dbl
-#' @importFrom magrittr %>%
 #'
 #' @export
 theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL, M,

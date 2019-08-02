@@ -10,7 +10,8 @@ Description: This package includes all of the code needed to produce the graphs
     of Barrientos et al. and Canonne et al. are ______ and _____, respectively.
     The code to optimize the parameters of our test and produce the plots is included
     in _____.
-License: What license is it under?
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
+Imports: magrittr, purrr, stats, poibin

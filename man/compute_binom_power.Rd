@@ -2,7 +2,7 @@
 % Please edit documentation in R/theoretical_power.R
 \name{compute_binom_power}
 \alias{compute_binom_power}
-\title{Compute power of private binomial test}
+\title{Power of private binomial test}
 \usage{
 compute_binom_power(alpha, M, theta_0, thetas, epsilon, nsims)
 }

@@ -10,7 +10,6 @@
 #'   p-value. Numering begins at zero (the intercept).
 #' @return The output will be a double
 #'
-#' @importFrom purrr map_dbl
 #' @importFrom magrittr %>%
 #'
 #' @export
@@ -27,6 +26,6 @@ compute_p_value <- function(df, M, epsilon, beta_number){
 
   p_val <- sum(coefficients > 0) %>%
     Calculate_Z(epsilon = epsilon) %>%
-    DP_Binom_test_twoside(n = M, theta_0 = 1/2, epsilon = epsilon, Z = .)
+    DP_Binom_test_twoside(n = M, theta_0 = 1/2, epsilon = epsilon)
   return(p_val)
 }

@@ -7,6 +7,9 @@
 #'   Slavkovic (2018).
 #' @return a vector of length \code{n}.
 #'
+#' @importFrom stats runif
+#' @importFrom stats rgeom
+#'
 #' @export
 rtulap <- function(n, m, b, q) {
   vect <- rep(NA, n)
@@ -20,8 +23,9 @@ rtulap <- function(n, m, b, q) {
 #'
 #' Created by Canyon.
 #'
-#' @param m,b,q the parameters of the Tulap distribution; described in Awan and
+#' @param m,b the parameters of the Tulap distribution; described in Awan and
 #'   Slavkovic (2018)
+#' @param x the quantile of interest
 #'
 #' @export
 tulap_cdf <- function(m, b, x) {

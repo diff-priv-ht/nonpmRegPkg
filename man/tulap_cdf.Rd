@@ -7,8 +7,10 @@
 tulap_cdf(m, b, x)
 }
 \arguments{
-\item{m, b, q}{the parameters of the Tulap distribution; described in Awan and
+\item{m, b}{the parameters of the Tulap distribution; described in Awan and
 Slavkovic (2018)}
+
+\item{x}{the quantile of interest}
 }
 \description{
 Created by Canyon.

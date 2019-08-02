@@ -2,7 +2,7 @@
 % Please edit documentation in R/theoretical_power.R
 \name{theoretical_power}
 \alias{theoretical_power}
-\title{Compute the theoretical power of our test}
+\title{Theoretical power of our test}
 \usage{
 theoretical_power(X = NULL, groups = NULL, n = NULL, d = NULL, M,
   effect_size, alpha, epsilon, nsims, theta_0,
