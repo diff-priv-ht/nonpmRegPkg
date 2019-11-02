@@ -48,6 +48,8 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
 #'   the database).
 #' @param d For normal test only. The number of dimensions (number of columns in
 #'   the database).
+#' @param n_zeros For normal test only. The number of entries of the alternative
+#'   distribution with mean zero. Defaults to 0.
 #' @param M The number of subsamples to partition the data into.
 #' @param effect_size The quotient of the parameter of interest (beta) and the
 #'   standard deviation of the noise (sigma).
@@ -64,9 +66,9 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
 #' @importFrom purrr map
 #'
 #' @export
-theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL, M,
-                              effect_size, alpha, epsilon, nsims, theta_0,
-                              test = "Linear Regression"){
+theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL,
+                              n_zeros = 0, M, effect_size, alpha, epsilon, nsims,
+                              theta_0, test = "Linear Regression"){
   if(test == "Linear Regression"){
     X_list <- map(.x = 1:M, .f = function(j){X[groups == j,]})
     thetas <- map_dbl(.x = X_list, .f = public_power_lm, effect_size = effect_size,
@@ -74,7 +76,8 @@ theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL, M,
   }
   if(test == "Normal"){
     pub_pows <- map_dbl(.x = c(ceiling(n/M), floor(n/M)), .f = public_power_normal,
-                        d = d, effect_size = effect_size, alpha = theta_0)
+                        d = d, effect_size = effect_size, alpha = theta_0,
+                        n_zeros = n_zeros)
     thetas <- c(rep(pub_pows[1], n - floor(n/M)*M),
                 rep(pub_pows[2], M - n + floor(n/M)*M))
   }

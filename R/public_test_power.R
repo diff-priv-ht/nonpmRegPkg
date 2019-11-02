@@ -29,16 +29,18 @@ public_power_lm <- function(X, effect_size, alpha){
 #' @param n The number of observations (number of rows in the database).
 #' @param d The number of dimensions (number of columns in the database).
 #' @param effect_size Determines the mean of the alternate distribution (which
-#'   will be `d` repetitions of `effect_size`).
+#'   will be `d-n_zeros` repetitions of `effect_size`).
 #' @param alpha The significance level.
+#' @param n_zeros The number of entries of the alternative distribution with
+#'   mean zero. Defaults to 0.
 #' @return The output will be a double between 0 and 1.
 #'
 #' @importFrom stats qchisq
 #' @importFrom stats pchisq
 #'
 #' @export
-public_power_normal <- function(n, d, effect_size, alpha){
-  lambda = n*d*effect_size^2
+public_power_normal <- function(n, d, effect_size, alpha, n_zeros = 0){
+  lambda = n*(d-n_zeros)*effect_size^2
 
   return(1-pchisq(qchisq(1-alpha, df = d), df = d, ncp = lambda))
 }

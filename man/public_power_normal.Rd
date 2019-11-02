@@ -4,7 +4,7 @@
 \alias{public_power_normal}
 \title{Normal test public power}
 \usage{
-public_power_normal(n, d, effect_size, alpha)
+public_power_normal(n, d, effect_size, alpha, n_zeros = 0)
 }
 \arguments{
 \item{n}{The number of observations (number of rows in the database).}
@@ -12,9 +12,12 @@ public_power_normal(n, d, effect_size, alpha)
 \item{d}{The number of dimensions (number of columns in the database).}
 
 \item{effect_size}{Determines the mean of the alternate distribution (which
-will be `d` repetitions of `effect_size`).}
+will be `d-n_zeros` repetitions of `effect_size`).}
 
 \item{alpha}{The significance level.}
+
+\item{n_zeros}{The number of entries of the alternative distribution with
+mean zero. Defaults to 0.}
 }
 \value{
 The output will be a double between 0 and 1.

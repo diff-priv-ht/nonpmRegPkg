@@ -4,8 +4,8 @@
 \alias{theoretical_power}
 \title{Theoretical power of our test}
 \usage{
-theoretical_power(X = NULL, groups = NULL, n = NULL, d = NULL, M,
-  effect_size, alpha, epsilon, nsims, theta_0,
+theoretical_power(X = NULL, groups = NULL, n = NULL, d = NULL,
+  n_zeros = 0, M, effect_size, alpha, epsilon, nsims, theta_0,
   test = "Linear Regression")
 }
 \arguments{
@@ -20,6 +20,9 @@ the database).}
 
 \item{d}{For normal test only. The number of dimensions (number of columns in
 the database).}
+
+\item{n_zeros}{For normal test only. The number of entries of the alternative
+distribution with mean zero. Defaults to 0.}
 
 \item{M}{The number of subsamples to partition the data into.}
 
