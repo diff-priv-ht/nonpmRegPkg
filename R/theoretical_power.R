@@ -11,14 +11,19 @@
 #' @param epsilon The privacy parameter.
 #' @param nsims The number of draws from the tulap and binomial with which to
 #'   compute the reference distribution.
+#' @param ncores The number of cores to use for the Poisson-binomial pmf
+#'   computation
 #' @return The output will be a double between 0 and 1.
 #'
 #' @importFrom poibin dpoibin
 #' @importFrom stats quantile
 #' @importFrom stats rbinom
+#' @importFrom parallel mclapply
+#' @importFrom purrr flatten_dbl
 #'
 #' @export
-compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
+compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims,
+                                ncores = 1){
   critical_values <- rbinom(nsims, M, theta_0) %>%
     rtulap(n = nsims, b = exp(-epsilon), q = 0) %>%
     quantile(c(alpha/2, 1- alpha/2))
@@ -26,8 +31,9 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
   cdf_Z <- function(x){
     F_underbar <- 0:M %>%
       map_dbl(~ tulap_cdf(.x, exp(-epsilon), x))
-    B_underbar <- 0:M %>%
-      map_dbl(~ dpoibin(kk = .x, pp = thetas))
+    B_underbar <- mclapply(X = 0:M, FUN = dpoibin, pp = thetas, mc.cores = ncores) %>%
+      flatten_dbl()
+    #map_dbl(~ dpoibin(kk = .x, pp = thetas))
     return(sum(F_underbar * B_underbar))
   }
 
@@ -60,6 +66,8 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
 #' @param theta_0 The threshold.
 #' @param test The test to compute the power of. Either "Linear Regression" or
 #'   "Normal"
+#' @param ncores The number of cores to use for the Poisson-binomial pmf
+#'   computation
 #' @return The output will be a double between 0 and 1.
 #'
 #' @importFrom purrr map_dbl
@@ -68,7 +76,7 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon, nsims){
 #' @export
 theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL,
                               n_zeros = 0, M, effect_size, alpha, epsilon, nsims,
-                              theta_0, test = "Linear Regression"){
+                              theta_0, test = "Linear Regression", ncores = 1){
   if(test == "Linear Regression"){
     X_list <- map(.x = 1:M, .f = function(j){X[groups == j,]})
     thetas <- map_dbl(.x = X_list, .f = public_power_lm, effect_size = effect_size,
@@ -82,5 +90,5 @@ theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL,
                 rep(pub_pows[2], M - n + floor(n/M)*M))
   }
   compute_binom_power(alpha = alpha , M = M, thetas = thetas, theta_0 = theta_0,
-                      epsilon = epsilon, nsims = nsims)
+                      epsilon = epsilon, nsims = nsims, ncores = ncores)
 }

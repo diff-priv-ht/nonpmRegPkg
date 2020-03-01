@@ -4,9 +4,21 @@
 \alias{theoretical_power}
 \title{Theoretical power of our test}
 \usage{
-theoretical_power(X = NULL, groups = NULL, n = NULL, d = NULL,
-  n_zeros = 0, M, effect_size, alpha, epsilon, nsims, theta_0,
-  test = "Linear Regression")
+theoretical_power(
+  X = NULL,
+  groups = NULL,
+  n = NULL,
+  d = NULL,
+  n_zeros = 0,
+  M,
+  effect_size,
+  alpha,
+  epsilon,
+  nsims,
+  theta_0,
+  test = "Linear Regression",
+  ncores = 1
+)
 }
 \arguments{
 \item{X}{For regression only. A design matrix with at least two explanatory
@@ -40,6 +52,9 @@ compute the reference distribution.}
 
 \item{test}{The test to compute the power of. Either "Linear Regression" or
 "Normal"}
+
+\item{ncores}{The number of cores to use for the Poisson-binomial pmf
+computation}
 }
 \value{
 The output will be a double between 0 and 1.

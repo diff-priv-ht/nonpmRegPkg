@@ -4,8 +4,17 @@
 \alias{Barrientos_power}
 \title{Barrientos power}
 \usage{
-Barrientos_power(X, groups, M, a_vector, effect_size, alpha, epsilon,
-  nsims, reps)
+Barrientos_power(
+  X,
+  groups,
+  M,
+  a_vector,
+  effect_size,
+  alpha,
+  epsilon,
+  nsims,
+  reps
+)
 }
 \arguments{
 \item{X}{The design matrix.}

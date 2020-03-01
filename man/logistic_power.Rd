@@ -4,8 +4,7 @@
 \alias{logistic_power}
 \title{Test of Tests Logistic Power}
 \usage{
-logistic_power(nsims, n, p, groups, epsilon, effect_size, M, theta_0,
-  alpha)
+logistic_power(nsims, n, p, groups, epsilon, effect_size, M, theta_0, alpha)
 }
 \arguments{
 \item{nsims}{Number of simulations.}
