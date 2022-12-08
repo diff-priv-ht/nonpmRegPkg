@@ -4,7 +4,7 @@
 \alias{bound_power}
 \title{Bound on test's power}
 \usage{
-bound_power(theta, theta_0, epsilon, n, alpha, power, nsims)
+bound_power(theta, theta_0, epsilon, n, alpha, power, nsims = NULL)
 }
 \arguments{
 \item{theta, theta_0, n}{Characteristics of the public test: it requires a
@@ -18,7 +18,7 @@ database of size `n` to achieve `theta` power at a sigificance level of
 \item{power}{The desired power of the private test.}
 
 \item{nsims}{The number of draws to compute the reference distribution for the
-binomial test}
+binomial test (No longer Used)}
 }
 \description{
 Function that, for given parameters of the public test, will compute an upper

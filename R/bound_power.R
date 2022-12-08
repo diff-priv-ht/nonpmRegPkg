@@ -10,16 +10,15 @@
 #'@param alpha The significance level for the private test.
 #'@param power The desired power of the private test.
 #'@param nsims The number of draws to compute the reference distribution for the
-#'  binomial test
+#'  binomial test (No longer Used)
 #'
 #'@export
-bound_power <- function(theta, theta_0, epsilon, n, alpha, power, nsims){
+bound_power <- function(theta, theta_0, epsilon, n, alpha, power, nsims = NULL){
   M <- 0
   power_M <- 0
   while(power_M < power){
     M <- M + 1
-    power_M <- compute_binom_power(alpha, M, theta_0, thetas = rep(theta, M), epsilon,
-                                      nsims = nsims)
+    power_M <- compute_binom_power(alpha, M, theta_0, thetas = rep(theta, M), epsilon)
   }
   return(paste0("M = ", M, ", n = ", n*M, ", power = ", round(power_M, 2)))
 }

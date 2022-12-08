@@ -14,7 +14,7 @@ theoretical_power(
   effect_size,
   alpha,
   epsilon,
-  nsims,
+  nsims = NULL,
   theta_0,
   test = "Linear Regression",
   ncores = 1
@@ -46,7 +46,7 @@ standard deviation of the noise (sigma).}
 \item{epsilon}{The privacy parameter.}
 
 \item{nsims}{The number of draws from the tulap and binomial with which to
-compute the reference distribution.}
+compute the reference distribution. (No Longer Used)}
 
 \item{theta_0}{The threshold.}
 
@@ -54,7 +54,7 @@ compute the reference distribution.}
 "Normal"}
 
 \item{ncores}{The number of cores to use for the Poisson-binomial pmf
-computation}
+computation (No Longer Used)}
 }
 \value{
 The output will be a double between 0 and 1.

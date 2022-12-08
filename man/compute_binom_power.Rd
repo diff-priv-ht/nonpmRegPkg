@@ -4,7 +4,7 @@
 \alias{compute_binom_power}
 \title{Power of private binomial test}
 \usage{
-compute_binom_power(alpha, M, theta_0, thetas, epsilon, nsims, ncores = 1)
+compute_binom_power(alpha, M, theta_0, thetas, epsilon)
 }
 \arguments{
 \item{alpha}{The significance level.}
@@ -17,12 +17,6 @@ compute_binom_power(alpha, M, theta_0, thetas, epsilon, nsims, ncores = 1)
 subsample.}
 
 \item{epsilon}{The privacy parameter.}
-
-\item{nsims}{The number of draws from the tulap and binomial with which to
-compute the reference distribution.}
-
-\item{ncores}{The number of cores to use for the Poisson-binomial pmf
-computation}
 }
 \value{
 The output will be a double between 0 and 1.
