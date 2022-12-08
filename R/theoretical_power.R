@@ -16,6 +16,7 @@
 #' @importFrom stats rbinom
 #' @importFrom stats qexp
 #' @importFrom stats optimize
+#' @importFrom base lapply
 #' @importFrom purrr flatten_dbl
 #'
 #' @export
@@ -23,7 +24,7 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon){
   cdf_Z <- function(x, thetas){
     F_underbar <- 0:M %>%
       map_dbl(~ tulap_cdf(.x, exp(-epsilon), x))
-    B_underbar <- mclapply(X = 0:M, FUN = dpoibin, pp = thetas, mc.cores = 1) %>%
+    B_underbar <- lapply(X = 0:M, FUN = dpoibin, pp = thetas) %>%
       flatten_dbl()
     #map_dbl(~ dpoibin(kk = .x, pp = thetas))
     return(sum(F_underbar * B_underbar))
