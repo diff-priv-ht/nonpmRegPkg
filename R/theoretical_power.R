@@ -16,7 +16,6 @@
 #' @importFrom stats rbinom
 #' @importFrom stats qexp
 #' @importFrom stats optimize
-#' @importFrom base lapply
 #' @importFrom purrr flatten_dbl
 #'
 #' @export
