@@ -91,3 +91,44 @@ theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL,
   compute_binom_power(alpha = alpha , M = M, thetas = thetas, theta_0 = theta_0,
                       epsilon = epsilon)
 }
+
+#' Optimize the parameters of our test for multivariate normal data
+#'
+#' Function that finds the parameters, M and theta_0, of our test that yield
+#' the highest power for a given combination of n, the effect size, and epsilon
+#'
+#' @param effect_size The quotient of the parameter of interest (mu) and the
+#'   standard deviation of the noise (sigma).
+#' @param epsilon The privacy parameter.
+#' @param n The number of observations (number of rows in
+#'   the database).
+#' @param alpha The significance level. Defaults to 0.05.
+#' @param d The number of dimensions (number of columns in
+#'   the database). Defaults to 1.
+#' @param n_zeros The number of entries of the alternative
+#'   distribution with mean zero. Defaults to 0.
+#' @param M_max The maximum M to search over. The optimizer will try all
+#'   integers from 1 to M_max
+#' @return The output will be a list with the achievable power and the
+#'   corresponding two parameter values
+#'
+#' @importFrom stats optimize
+#'
+#' @export
+optimize_power_norm <- function(effect_size, epsilon, n, alpha = 0.05, d = 1,
+                                n_zeros = 0, M_max = min(floor(n/3), 50)){
+  curr_max_pow <- 0; theta_0 <- NA; M <- NA
+
+  for(i in 1:M_max){
+    opt <- optimize(f = theoretical_power, interval = c(0,1), maximum = T, M = i,
+                    effect_size = effect_size, alpha = alpha, epsilon = epsilon,
+                    test = "Normal", n = n, d = d, X = NULL, groups = NULL,
+                    n_zeros = n_zeros, nsims = NULL)
+    if(opt$objective > curr_max_pow){
+      curr_max_pow <- opt$objective
+      theta_0 <- opt$maximum
+      M <- i
+    }
+  }
+  return(list("power" = curr_max_pow, "theta_0" = theta_0, "M" = M))
+}
