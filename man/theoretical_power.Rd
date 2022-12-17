@@ -5,29 +5,42 @@
 \title{Theoretical power of our test}
 \usage{
 theoretical_power(
+  theta_0,
+  M,
+  effect_size,
+  epsilon,
+  alpha = 0.05,
   X = NULL,
   groups = NULL,
   n = NULL,
-  d = NULL,
+  d = 1,
   n_zeros = 0,
-  M,
-  effect_size,
-  alpha,
-  epsilon,
   nsims = NULL,
-  theta_0,
   test = "Linear Regression",
   ncores = 1
 )
 }
 \arguments{
+\item{theta_0}{The threshold.}
+
+\item{M}{The number of subsamples to partition the data into.}
+
+\item{effect_size}{The quotient of the parameter of interest (beta or mu) and
+the standard deviation of the noise (sigma). For ANOVA, a vector with the
+between group variance and within group variance.}
+
+\item{epsilon}{The privacy parameter.}
+
+\item{alpha}{The significance level, defaults to 0.05}
+
 \item{X}{For regression only. A design matrix with at least two explanatory
 variables.}
 
-\item{groups}{For regression only. A vector of length \code{nrow(X)} with the
-index of the group of each row in \code{X}.}
+\item{groups}{For regression, a vector of length \code{nrow(X)} with the
+index of the group of each row in \code{X}. For ANOVA, an integer of the
+number of groups}
 
-\item{n}{For normal test only. The number of observations (number of rows in
+\item{n}{For normal or ANOVA. The number of observations (number of rows in
 the database).}
 
 \item{d}{For normal test only. The number of dimensions (number of columns in
@@ -36,22 +49,11 @@ the database).}
 \item{n_zeros}{For normal test only. The number of entries of the alternative
 distribution with mean zero. Defaults to 0.}
 
-\item{M}{The number of subsamples to partition the data into.}
-
-\item{effect_size}{The quotient of the parameter of interest (beta) and the
-standard deviation of the noise (sigma).}
-
-\item{alpha}{The significance level.}
-
-\item{epsilon}{The privacy parameter.}
-
 \item{nsims}{The number of draws from the tulap and binomial with which to
 compute the reference distribution. (No Longer Used)}
 
-\item{theta_0}{The threshold.}
-
-\item{test}{The test to compute the power of. Either "Linear Regression" or
-"Normal"}
+\item{test}{The test to compute the power of. Either "Linear Regression",
+"Normal", or "ANOVA"}
 
 \item{ncores}{The number of cores to use for the Poisson-binomial pmf
 computation (No Longer Used)}

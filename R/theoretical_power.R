@@ -45,37 +45,41 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon){
 #' Function that computes the power of our test for a given a design matrix and
 #' a given partitioning into subsamples.
 #'
+#' @param theta_0 The threshold.
+#' @param M The number of subsamples to partition the data into.
+#' @param effect_size The quotient of the parameter of interest (beta or mu) and
+#'   the standard deviation of the noise (sigma). For ANOVA, a vector with the
+#'   between group variance and within group variance.
+#' @param epsilon The privacy parameter.
+#' @param alpha The significance level, defaults to 0.05
 #' @param X For regression only. A design matrix with at least two explanatory
 #'   variables.
-#' @param groups For regression only. A vector of length \code{nrow(X)} with the
-#'   index of the group of each row in \code{X}.
-#' @param n For normal test only. The number of observations (number of rows in
+#' @param groups For regression, a vector of length \code{nrow(X)} with the
+#'   index of the group of each row in \code{X}. For ANOVA, an integer of the
+#'   number of groups
+#' @param n For normal or ANOVA. The number of observations (number of rows in
 #'   the database).
 #' @param d For normal test only. The number of dimensions (number of columns in
 #'   the database).
 #' @param n_zeros For normal test only. The number of entries of the alternative
 #'   distribution with mean zero. Defaults to 0.
-#' @param M The number of subsamples to partition the data into.
-#' @param effect_size The quotient of the parameter of interest (beta) and the
-#'   standard deviation of the noise (sigma).
-#' @param alpha The significance level.
-#' @param epsilon The privacy parameter.
 #' @param nsims The number of draws from the tulap and binomial with which to
 #'   compute the reference distribution. (No Longer Used)
-#' @param theta_0 The threshold.
-#' @param test The test to compute the power of. Either "Linear Regression" or
-#'   "Normal"
+#' @param test The test to compute the power of. Either "Linear Regression",
+#'   "Normal", or "ANOVA"
 #' @param ncores The number of cores to use for the Poisson-binomial pmf
 #'   computation (No Longer Used)
 #' @return The output will be a double between 0 and 1.
 #'
 #' @importFrom purrr map_dbl
 #' @importFrom purrr map
+#' @importFrom stats power.anova.test
 #'
 #' @export
-theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL,
-                              n_zeros = 0, M, effect_size, alpha, epsilon, nsims = NULL,
-                              theta_0, test = "Linear Regression", ncores = 1){
+theoretical_power <- function(theta_0, M, effect_size, epsilon, alpha = 0.05,
+                              X = NULL, groups = NULL, n = NULL, d = 1,
+                              n_zeros = 0, nsims = NULL,
+                              test = "Linear Regression", ncores = 1){
   if(test == "Linear Regression"){
     X_list <- map(.x = 1:M, .f = function(j){X[groups == j,]})
     thetas <- map_dbl(.x = X_list, .f = public_power_lm, effect_size = effect_size,
@@ -85,6 +89,16 @@ theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL,
     pub_pows <- map_dbl(.x = c(ceiling(n/M), floor(n/M)), .f = public_power_normal,
                         d = d, effect_size = effect_size, alpha = theta_0,
                         n_zeros = n_zeros)
+    thetas <- c(rep(pub_pows[1], n - floor(n/M)*M),
+                rep(pub_pows[2], M - n + floor(n/M)*M))
+  }
+  if(test == "ANOVA"){
+    g <- groups
+    if(length(effect_size) == 1){ effect_size <- rep(effect_size, 2) }
+    f <- function(n){power.anova.test(groups = g, between.var = effect_size[1],
+                                      within.var = effect_size[2], n = n,
+                                      sig.level = theta_0, power = NULL)$power}
+    pub_pows <- map_dbl(.x = c(ceiling(n/M/g), floor(n/M/g)), .f = f)
     thetas <- c(rep(pub_pows[1], n - floor(n/M)*M),
                 rep(pub_pows[2], M - n + floor(n/M)*M))
   }
@@ -117,13 +131,52 @@ theoretical_power <- function(X = NULL, groups = NULL, n = NULL, d = NULL,
 #' @export
 optimize_power_norm <- function(effect_size, epsilon, n, alpha = 0.05, d = 1,
                                 n_zeros = 0, M_max = min(floor(n/3), 50)){
-  curr_max_pow <- 0; theta_0 <- NA; M <- NA
+  curr_max_pow <- 0
 
   for(i in 1:M_max){
     opt <- optimize(f = theoretical_power, interval = c(0,1), maximum = T, M = i,
                     effect_size = effect_size, alpha = alpha, epsilon = epsilon,
                     test = "Normal", n = n, d = d, X = NULL, groups = NULL,
                     n_zeros = n_zeros, nsims = NULL)
+    if(opt$objective > curr_max_pow){
+      curr_max_pow <- opt$objective
+      theta_0 <- opt$maximum
+      M <- i
+    }
+  }
+  return(list("power" = curr_max_pow, "theta_0" = theta_0, "M" = M))
+}
+
+
+#' Optimize the parameters of our test for multivariate normal data
+#'
+#' Function that finds the parameters, M and theta_0, of our test that yield
+#' the highest power for a given combination of n, the effect size, and epsilon
+#'
+#' @param n The number of observations (number of rows in the database). Should
+#'   be a multiple of three.
+#' @param effect_size A vector with the  between group variance and within group
+#'   variance. Defaults to 1, as in Couch et al.
+#' @param epsilon The privacy parameter. Defaults to 1, as in Couch et al.
+#' @param alpha The significance level. Defaults to 0.05.
+#' @param groups The number of groups in each subsample for ANOVA.
+#' @param M_max The maximum M to search over. The optimizer will try all
+#'   integers from 1 to M_max
+#' @return The output will be a list with the achievable power and the
+#'   corresponding two parameter values
+#'
+#' @importFrom stats optimize
+#'
+#' @export
+optimize_power_ANOVA <- function(n, effect_size = 1, epsilon = 1, alpha = 0.05,
+                                 groups = 3, M_max = min(floor(n/groups/2), 50)){
+  curr_max_pow <- 0
+
+  for(i in 1:M_max){
+    opt <- optimize(f = theoretical_power, interval = c(0,1), maximum = T, M = i,
+                    effect_size = effect_size, alpha = alpha, epsilon = epsilon,
+                    test = "ANOVA", n = n, groups = groups, X = NULL,
+                    n_zeros = NULL, nsims = NULL)
     if(opt$objective > curr_max_pow){
       curr_max_pow <- opt$objective
       theta_0 <- opt$maximum
