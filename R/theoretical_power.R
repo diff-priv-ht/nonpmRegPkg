@@ -30,14 +30,11 @@ compute_binom_power <- function(alpha, M, theta_0, thetas, epsilon){
   }
 
   tol <- 2*qexp(.99,rate = epsilon)
-  critical_values <- c(optimize(function(x){abs(cdf_Z(x, thetas = rep(theta_0, M)) - alpha/2)},
-                                interval = c(-tol, M+tol))$minimum,
-                       optimize(function(x){abs(cdf_Z(x, thetas = rep(theta_0, M)) - 1 + alpha/2)},
-                                interval = c(-tol, M+tol))$minimum)
+  critical_value <- optimize(function(x){abs(cdf_Z(x, thetas = rep(theta_0, M)) - 1 + alpha)},
+                             interval = c(-tol, M+tol))$minimum
 
 
-  return(cdf_Z(as.double(critical_values[1]), thetas) +
-           (1 - cdf_Z(as.double(critical_values[2]), thetas)))
+  return(1 - cdf_Z(as.double(critical_value), thetas))
 }
 
 #' Theoretical power of our test
