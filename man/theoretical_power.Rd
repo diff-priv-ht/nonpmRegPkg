@@ -26,8 +26,8 @@ theoretical_power(
 \item{M}{The number of subsamples to partition the data into.}
 
 \item{effect_size}{The quotient of the parameter of interest (beta or mu) and
-the standard deviation of the noise (sigma). For ANOVA, a vector with the
-between group variance and within group variance.}
+the standard deviation of the noise (sigma). For ANOVA, the ratio of the
+between group variance to the within group variance.}
 
 \item{epsilon}{The privacy parameter.}
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/theoretical_power.R
 \name{optimize_power_ANOVA}
 \alias{optimize_power_ANOVA}
-\title{Optimize the parameters of our test for multivariate normal data}
+\title{Optimize the parameters of our test for ANOVA data}
 \usage{
 optimize_power_ANOVA(
   n,
@@ -17,7 +17,7 @@ optimize_power_ANOVA(
 \item{n}{The number of observations (number of rows in the database). Should
 be a multiple of three.}
 
-\item{effect_size}{A vector with the  between group variance and within group
+\item{effect_size}{The ratio of the between group variance to the within group
 variance. Defaults to 1, as in Couch et al.}
 
 \item{epsilon}{The privacy parameter. Defaults to 1, as in Couch et al.}
