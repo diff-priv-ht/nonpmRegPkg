@@ -131,7 +131,7 @@ theoretical_power <- function(theta_0, M, effect_size, epsilon, alpha = 0.05,
 #'
 #' @export
 optimize_power_norm <- function(effect_size, epsilon, n, alpha = 0.05, d = 1,
-                                n_zeros = 0, M_max = min(floor(n/3), 50)){
+                                n_zeros = 0, M_max = min(n, 50)){
 
   f <- function(M, n, d, n_zeros, effect_size, epsilon, alpha){
     opt <- optimize(f = theoretical_power, interval = c(0,1), maximum = T, M = M,
