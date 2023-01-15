@@ -10,7 +10,7 @@ optimize_power_ANOVA(
   epsilon = 1,
   alpha = 0.05,
   groups = 3,
-  M_max = min(floor(n/groups/2), 50)
+  M_max = floor(n/groups/2)
 )
 }
 \arguments{
@@ -26,8 +26,7 @@ variance. Defaults to 1, as in Couch et al.}
 
 \item{groups}{The number of groups in each subsample for ANOVA.}
 
-\item{M_max}{The maximum M to search over. The optimizer will try all
-integers from 1 to M_max}
+\item{M_max}{The maximum M to search over.}
 }
 \value{
 The output will be a list with the achievable power and the

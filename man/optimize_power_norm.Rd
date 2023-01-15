@@ -11,7 +11,7 @@ optimize_power_norm(
   alpha = 0.05,
   d = 1,
   n_zeros = 0,
-  M_max = min(floor(n/3), 50)
+  M_max = n
 )
 }
 \arguments{

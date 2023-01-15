@@ -131,7 +131,7 @@ theoretical_power <- function(theta_0, M, effect_size, epsilon, alpha = 0.05,
 #'
 #' @export
 optimize_power_norm <- function(effect_size, epsilon, n, alpha = 0.05, d = 1,
-                                n_zeros = 0, M_max = min(n, 50)){
+                                n_zeros = 0, M_max = n){
 
   f <- function(M, n, d, n_zeros, effect_size, epsilon, alpha){
     opt <- optimize(f = theoretical_power, interval = c(0,1), maximum = T, M = M,
@@ -141,12 +141,15 @@ optimize_power_norm <- function(effect_size, epsilon, n, alpha = 0.05, d = 1,
     return(c(opt$objective, opt$maximum,M))
   }
 
+  M_vec <- c(1:sqrt(n), floor(n/rev(1:(sqrt(n)+1))))
+  M_vec <- M_vec[!duplicated(M_vec) & M_vec <= M_max]
+
   cl <- makeCluster(detectCores()-1)
   registerDoParallel(cl)
   clusterExport(cl,list('theoretical_power', 'map_dbl', 'compute_binom_power',
                         'public_power_normal', '%>%', 'tulap_cdf',
                         'flatten_dbl', 'dpoibin'))
-  x <- parLapply(cl, X = 1:M_max, fun = f, n = n, d = d, n_zeros = n_zeros,
+  x <- parLapply(cl, X = M_vec, fun = f, n = n, d = d, n_zeros = n_zeros,
                  effect_size = effect_size, epsilon = epsilon, alpha = alpha)
   max_x <- x[[which.max(as.numeric(sapply(x,"[[",1)))]]
 
@@ -171,6 +174,7 @@ optimize_power_norm <- function(effect_size, epsilon, n, alpha = 0.05, d = 1,
 #'   distribution with mean zero. Defaults to 0.
 #' @param M_start Starting value of M
 #' @param alpha0_start Starting value of alpha0
+#' @param M_max The maximum M to search over.
 #'
 #' @return The output will be a list with the achievable power, the
 #'   corresponding two parameter values, and the minimum effect size
@@ -178,7 +182,7 @@ optimize_power_norm <- function(effect_size, epsilon, n, alpha = 0.05, d = 1,
 #' @export
 practical_pars_norm <- function(effect_size_grid, epsilon, n, rho = 0.8, alpha = 0.05,
                                   d = 1, n_zeros = 0, M_start = min(12,floor(n/3)),
-                                  alpha0_start = 0.2){
+                                  alpha0_start = 0.2, M_max = n){
   i <- (length(effect_size_grid)+1) %/% 2; M = M_start; alpha_0 = alpha0_start
   while(length(effect_size_grid) > 1){
     pwr <- theoretical_power(effect_size = effect_size_grid[i], M = M, n = n,
@@ -186,7 +190,7 @@ practical_pars_norm <- function(effect_size_grid, epsilon, n, rho = 0.8, alpha =
                              d = d, n_zeros = n_zeros, alpha = alpha)
     if(pwr < rho){
       opt <- optimize_power_norm(effect_size = effect_size_grid[i], epsilon, n,
-                                 alpha, d, n_zeros)
+                                 alpha, d, n_zeros, M_max = M_max)
       pwr <- opt$power; alpha_0 <- opt$theta_0; M <- opt$M
     }
     if(pwr >= rho){
@@ -199,7 +203,7 @@ practical_pars_norm <- function(effect_size_grid, epsilon, n, rho = 0.8, alpha =
     }
   }
   opt <- optimize_power_norm(effect_size = effect_size_grid, epsilon, n,
-                             alpha, d, n_zeros)
+                             alpha, d, n_zeros, M_max = M_max)
   return(list("power" = opt$power, "theta_0" = opt$theta_0, "M" = opt$M,
               "min_effect_size" = effect_size_grid))
 }
@@ -225,13 +229,15 @@ practical_pars_norm <- function(effect_size_grid, epsilon, n, rho = 0.8, alpha =
 #'   distribution with mean zero. Defaults to 0.
 #' @param M_start Starting value of M
 #' @param alpha0_start Starting value of alpha0
+#' @param M_max The maximum M to search over.
 #'
 #' @export
 practical_power_norm <- function(effect_size, epsilon, n, effect_size_grid = seq(0,1.5,0.1),
                                  rho = 0.8, alpha = 0.05, d = 1, n_zeros = 0,
-                                 M_start = min(12,floor(n/3)), alpha0_start = 0.2){
+                                 M_start = min(12,floor(n/3)), alpha0_start = 0.2,
+                                 M_max = n){
   l <- practical_pars_norm(effect_size_grid, epsilon, n, rho, alpha, d, n_zeros,
-                            M_start, alpha0_start)
+                            M_start, alpha0_start, M_max)
   return(theoretical_power(effect_size = effect_size, M = l$M, n = n,
                            epsilon = epsilon, test = "Normal", theta_0 = l$theta_0,
                            d = d, n_zeros = n_zeros, alpha = alpha))
@@ -250,8 +256,7 @@ practical_power_norm <- function(effect_size, epsilon, n, effect_size_grid = seq
 #' @param epsilon The privacy parameter. Defaults to 1, as in Couch et al.
 #' @param alpha The significance level. Defaults to 0.05.
 #' @param groups The number of groups in each subsample for ANOVA.
-#' @param M_max The maximum M to search over. The optimizer will try all
-#'   integers from 1 to M_max
+#' @param M_max The maximum M to search over.
 #' @return The output will be a list with the achievable power and the
 #'   corresponding two parameter values
 #'
@@ -259,7 +264,7 @@ practical_power_norm <- function(effect_size, epsilon, n, effect_size_grid = seq
 #'
 #' @export
 optimize_power_ANOVA <- function(n, effect_size = 1, epsilon = 1, alpha = 0.05,
-                                 groups = 3, M_max = min(floor(n/groups/2), 50)){
+                                 groups = 3, M_max = floor(n/groups/2)){
   f <- function(M, n, groups, effect_size, epsilon, alpha){
     opt <- optimize(f = theoretical_power, interval = c(0,1), maximum = T, M = M,
                     effect_size = effect_size, alpha = alpha, epsilon = epsilon,
@@ -268,11 +273,14 @@ optimize_power_ANOVA <- function(n, effect_size = 1, epsilon = 1, alpha = 0.05,
     return(c(opt$objective, opt$maximum,M))
   }
 
+  M_vec <- c(1:sqrt(n), floor(n/rev(1:(sqrt(n)+1))))
+  M_vec <- M_vec[!duplicated(M_vec) & M_vec <= M_max]
+
   cl <- makeCluster(detectCores()-1)
   registerDoParallel(cl)
   clusterExport(cl,list('theoretical_power', 'map_dbl', 'compute_binom_power',
                         '%>%', 'tulap_cdf', 'flatten_dbl', 'dpoibin'))
-  x <- parLapply(cl, X = 1:M_max, fun = f, n = n, groups = groups,
+  x <- parLapply(cl, X = M_vec, fun = f, n = n, groups = groups,
                  effect_size = effect_size, epsilon = epsilon, alpha = alpha)
   max_x <- x[[which.max(as.numeric(sapply(x,"[[",1)))]]
 
@@ -294,6 +302,7 @@ optimize_power_ANOVA <- function(n, effect_size = 1, epsilon = 1, alpha = 0.05,
 #' @param groups The number of groups in each subsample for ANOVA.
 #' @param M_start Starting value of M
 #' @param alpha0_start Starting value of alpha0
+#' @param M_max The maximum M to search over.
 #'
 #' @return The output will be a list with the achievable power, the
 #'   corresponding two parameter values, and the minimum effect size
@@ -302,7 +311,7 @@ optimize_power_ANOVA <- function(n, effect_size = 1, epsilon = 1, alpha = 0.05,
 practical_pars_ANOVA <- function(effect_size_grid, epsilon, n, rho = 0.8,
                                  alpha = 0.05, groups = 3,
                                  M_start = min(12,floor(n/2/groups)),
-                                 alpha0_start = 0.2){
+                                 alpha0_start = 0.2, M_max = floor(n/2/groups)){
   i <- (length(effect_size_grid)+1) %/% 2; M = M_start; alpha_0 = alpha0_start
   while(length(effect_size_grid) > 1){
     pwr <- theoretical_power(effect_size = effect_size_grid[i], M = M, n = n,
@@ -310,7 +319,7 @@ practical_pars_ANOVA <- function(effect_size_grid, epsilon, n, rho = 0.8,
                              groups = groups, alpha = alpha)
     if(pwr < rho){
       opt <- optimize_power_ANOVA(n, effect_size = effect_size_grid[i], epsilon,
-                                 alpha, groups)
+                                 alpha, groups, M_max)
       pwr <- opt$power; alpha_0 <- opt$theta_0; M <- opt$M
     }
     if(pwr >= rho){
@@ -327,7 +336,7 @@ practical_pars_ANOVA <- function(effect_size_grid, epsilon, n, rho = 0.8,
     return(list("power" = NA, "theta_0" = NA, "M" = NA, "min_effect_size" = NA))
   }
   opt <- optimize_power_ANOVA(n, effect_size = effect_size_grid, epsilon,
-                              alpha, groups)
+                              alpha, groups, M_max)
   return(list("power" = opt$power, "theta_0" = opt$theta_0, "M" = opt$M,
               "min_effect_size" = effect_size_grid))
 }
@@ -351,13 +360,15 @@ practical_pars_ANOVA <- function(effect_size_grid, epsilon, n, rho = 0.8,
 #' @param groups The number of groups in each subsample for ANOVA.
 #' @param M_start Starting value of M
 #' @param alpha0_start Starting value of alpha0
+#' @param M_max The maximum M to search over.
 #'
 #' @export
 practical_power_ANOVA <- function(effect_size, epsilon, n, effect_size_grid = seq(0,3,0.2),
                                   rho = 0.8, alpha = 0.05, groups = 3,
-                                  M_start = min(12,floor(n/2/groups)), alpha0_start = 0.2){
+                                  M_start = min(12,floor(n/2/groups)), alpha0_start = 0.2,
+                                  M_max = floor(n/2/groups)){
   l <- practical_pars_ANOVA(effect_size_grid, epsilon, n, rho, alpha, groups,
-                            M_start, alpha0_start)
+                            M_start, alpha0_start, M_max)
   return(theoretical_power(effect_size = effect_size, M = l$M, n = n,
                            epsilon = epsilon, test = "ANOVA", theta_0 = l$theta_0,
                            groups = groups, alpha = alpha))

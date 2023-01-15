@@ -13,7 +13,8 @@ practical_pars_norm(
   d = 1,
   n_zeros = 0,
   M_start = min(12, floor(n/3)),
-  alpha0_start = 0.2
+  alpha0_start = 0.2,
+  M_max = n
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ distribution with mean zero. Defaults to 0.}
 \item{M_start}{Starting value of M}
 
 \item{alpha0_start}{Starting value of alpha0}
+
+\item{M_max}{The maximum M to search over.}
 }
 \value{
 The output will be a list with the achievable power, the

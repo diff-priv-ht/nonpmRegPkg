@@ -12,7 +12,8 @@ practical_pars_ANOVA(
   alpha = 0.05,
   groups = 3,
   M_start = min(12, floor(n/2/groups)),
-  alpha0_start = 0.2
+  alpha0_start = 0.2,
+  M_max = floor(n/2/groups)
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ the database).}
 \item{M_start}{Starting value of M}
 
 \item{alpha0_start}{Starting value of alpha0}
+
+\item{M_max}{The maximum M to search over.}
 }
 \value{
 The output will be a list with the achievable power, the
