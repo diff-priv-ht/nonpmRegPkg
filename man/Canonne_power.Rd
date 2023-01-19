@@ -13,7 +13,8 @@ Canonne_power(
   delta,
   alpha,
   nsims,
-  mc.cores = detectCores() - 1
+  mc.cores = detectCores() - 1,
+  PC = FALSE
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ to detect. THIS IS NOT THE SIGNIFICANCE LEVEL!}
 \item{nsims}{The number of times to run the test.}
 
 \item{mc.cores}{Number of cores used for parallelization.}
+
+\item{PC}{flag for whether or not computation is on a PC}
 }
 \value{
 A double between 0 and 1.

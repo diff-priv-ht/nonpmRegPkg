@@ -117,6 +117,7 @@ Canonne_test <- function(data, epsilon, delta, alpha){
 #'   to detect. THIS IS NOT THE SIGNIFICANCE LEVEL!
 #' @param nsims The number of times to run the test.
 #' @param mc.cores Number of cores used for parallelization.
+#' @param PC flag for whether or not computation is on a PC
 #'
 #' @return A double between 0 and 1.
 #'
