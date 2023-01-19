@@ -60,7 +60,7 @@ Canonne_test <- function(data, epsilon, delta, alpha){
   X_tildes <- X_bars + rnorm(n = d, sd = sigma)
 
   #Line 13
-  Delta_delta <- 225*(d*log(d/delta) + d/(n*epsilon^2)*log(1/delta)^2 +
+  Delta_delta <- 144*(d*log(d/delta) + d/(n*epsilon^2)*log(1/delta)^2 +
                         sqrt(n*d*log(d/delta)*log(n/delta)) +
                         sqrt(d)/epsilon*log(1/delta)*
                         sqrt(log(n/delta)))*log(n*d/delta)
@@ -107,26 +107,30 @@ Canonne_test <- function(data, epsilon, delta, alpha){
 #' Determines the power of the test proposed by Canonne et al. by simulation.
 #'
 #' @param eff Determines the mean of the alternate distribution (which
-#'   will be `d` repetitions of `eff`).
+#'   will be `d - n_zeros` repetitions of `eff`).
 #' @param n Number of observations (number of rows of the database).
+#' @param n_zeros Number of dimensions (out of `d`) with no effect.
 #' @param d Number of dimensions (number of columns of the database).
 #' @param epsilon The privacy parameter.
 #' @param delta The privacy parameter.
 #' @param alpha As in the paper, this is the effect size the test should be able
 #'   to detect. THIS IS NOT THE SIGNIFICANCE LEVEL!
 #' @param nsims The number of times to run the test.
+#' @param mc.cores Number of cores used for parallelization.
 #'
 #' @return A double between 0 and 1.
 #'
 #' @export
-Canonne_power <- function(eff, n, d, epsilon, delta, alpha, nsims){
+Canonne_power <- function(eff, n, n_zeros, d, epsilon, delta, alpha, nsims,
+                          mc.cores = detectCores() - 1){
   func <- function(sim){
-    return(data.frame(matrix(rnorm(n*d, mean = rep(eff, d)), byrow = TRUE, ncol = d)))
+    data.frame(matrix(rnorm(n = n*d, mean = c(rep(0, n_zeros), rep(eff, d-n_zeros))),
+                      nrow = n, byrow = T))
   }
   X <- map(.x = 1:nsims, .f = func)
   epsilon_scaled <- epsilon/5
-  delta_scaled <- delta/21
+  delta_scaled <- delta/17
   results <- mclapply(X = X, FUN = Canonne_test, epsilon = epsilon_scaled,
-                      delta = delta_scaled, alpha = alpha, mc.cores = 8)
+                      delta = delta_scaled, alpha = alpha, mc.cores = mc.cores)
   return(mean(results == "REJECT"))
 }

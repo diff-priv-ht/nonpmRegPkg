@@ -4,13 +4,25 @@
 \alias{Canonne_power}
 \title{Canonne Power}
 \usage{
-Canonne_power(eff, n, d, epsilon, delta, alpha, nsims)
+Canonne_power(
+  eff,
+  n,
+  n_zeros,
+  d,
+  epsilon,
+  delta,
+  alpha,
+  nsims,
+  mc.cores = detectCores() - 1
+)
 }
 \arguments{
 \item{eff}{Determines the mean of the alternate distribution (which
-will be `d` repetitions of `eff`).}
+will be `d - n_zeros` repetitions of `eff`).}
 
 \item{n}{Number of observations (number of rows of the database).}
+
+\item{n_zeros}{Number of dimensions (out of `d`) with no effect.}
 
 \item{d}{Number of dimensions (number of columns of the database).}
 
@@ -22,6 +34,8 @@ will be `d` repetitions of `eff`).}
 to detect. THIS IS NOT THE SIGNIFICANCE LEVEL!}
 
 \item{nsims}{The number of times to run the test.}
+
+\item{mc.cores}{Number of cores used for parallelization.}
 }
 \value{
 A double between 0 and 1.
