@@ -124,23 +124,27 @@ Canonne_test <- function(data, epsilon, delta, alpha){
 #' @export
 Canonne_power <- function(eff, n, n_zeros, d, epsilon, delta, alpha, nsims,
                           mc.cores = detectCores() - 1, PC = FALSE){
-  func <- function(sim){
-    data.frame(matrix(rnorm(n = n*d, mean = c(rep(0, n_zeros), rep(eff, d-n_zeros))),
-                      nrow = n, byrow = T))
-  }
-  X <- map(.x = 1:nsims, .f = func)
   epsilon_scaled <- epsilon/5
   delta_scaled <- delta/17
+
+  func <- function(sim){
+    X <- data.frame(matrix(rnorm(n = n*d, mean = c(rep(0, n_zeros),
+                                                   rep(eff, d-n_zeros))),
+                           nrow = n, byrow = T))
+    Canonne_test(data = X, epsilon = epsilon_scaled, delta = delta_scaled,
+                 alpha = alpha)
+  }
+  #X <- map(.x = 1:nsims, .f = func)
+
   if(!PC){
-    results <- mclapply(X = X, FUN = Canonne_test, epsilon = epsilon_scaled,
-                        delta = delta_scaled, alpha = alpha, mc.cores = mc.cores)
+    results <- mclapply(X = 1:nsims, FUN = func, mc.cores = mc.cores)
   }
   else{
     cl <- makeCluster(mc.cores)
     registerDoParallel(cl)
-    clusterExport(cl,list('map_dbl', '%>%', 'rlaplace', 'map_dfc', 'if_else', 'map_lgl'))
-    results <- parLapply(cl, X = X, fun = Canonne_test, epsilon = epsilon_scaled,
-                         delta = delta_scaled, alpha = alpha)
+    clusterExport(cl,list('map_dbl', '%>%', 'rlaplace', 'map_dfc', 'if_else',
+                          'map_lgl', 'Canonne_test'))
+    results <- parLapply(cl, X = 1:nsims, fun = func)
   }
   return(mean(results == "REJECT"))
 }
