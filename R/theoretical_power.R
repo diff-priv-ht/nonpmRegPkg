@@ -95,8 +95,8 @@ theoretical_power <- function(theta_0, M, effect_size, epsilon, alpha = 0.05,
                                       within.var = 1, n = n,
                                       sig.level = theta_0, power = NULL)$power}
     pub_pows <- map_dbl(.x = c(ceiling(n/M/g), floor(n/M/g)), .f = f)
-    thetas <- c(rep(pub_pows[1], n - floor(n/M)*M),
-                rep(pub_pows[2], M - n + floor(n/M)*M))
+    thetas <- c(rep(pub_pows[1], floor(n/g - floor(n/M/g)*M)),
+                rep(pub_pows[2], ceiling(M - n/g + floor(n/M/g)*M)))
   }
   compute_binom_power(alpha = alpha , M = M, thetas = thetas, theta_0 = theta_0,
                       epsilon = epsilon)

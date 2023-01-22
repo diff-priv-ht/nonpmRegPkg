@@ -119,7 +119,7 @@ find_k_alpha0 = function(eps, alpha, alpha_min = 0) {
 #' @param alpha The significance level
 #' @param k,alpha0 Parameters of PB. If NULL, computed within the function
 #'
-#' @importFrom stats dbinom
+#' @importFrom PoissonBinomial dpbinom
 #'
 #' @export
 PB_power_norm <- function(epsilon, effect_size, n, d = 1, n_zeros = 0, alpha = 0.05,
@@ -130,11 +130,16 @@ PB_power_norm <- function(epsilon, effect_size, n, d = 1, n_zeros = 0, alpha = 0
   }
   p <- find_p(k, epsilon)
 
-  norm_pow <- public_power_normal(n = n/(2*k+1), d = d, effect_size = effect_size,
-                                  alpha = alpha0, n_zeros = n_zeros)
+  norm_pow_1 <- public_power_normal(n = ceiling(n/(2*k+1)), d = d, effect_size = effect_size,
+                                    alpha = alpha0, n_zeros = n_zeros)
+  norm_pow_0 <- public_power_normal(n = floor(n/(2*k+1)), d = d, effect_size = effect_size,
+                                    alpha = alpha0, n_zeros = n_zeros)
+  norm_pows <- c(rep(norm_pow_1, n - floor(n/(2*k+1))*(2*k+1)),
+                 rep(norm_pow_0, 2*k+1 - n + floor(n/(2*k+1))*(2*k+1)))
+
   power <- 0
   for(t in 0:(2*k+1)){
-    likelihood <- dbinom(t, 2*k+1, norm_pow)
+    likelihood <- dpbinom(t, norm_pows)
     rej_prob <- ppbinom(x = k, probs = c(rep(p, t), rep(1-p, 2*k+1-t)), lower.tail = F)
     power <- power + likelihood*rej_prob
   }
@@ -163,12 +168,18 @@ PB_power_ANOVA <- function(epsilon, effect_size, n, groups = 3, alpha = 0.05,
   }
   p <- find_p(k, epsilon)
 
-  ANOVA_pow <- power.anova.test(groups = groups, between.var = effect_size,
-                                within.var = 1, n = floor(n/(2*k+1)/groups),
-                                sig.level = alpha0, power = NULL)$power
+  ANOVA_pow_0 <- power.anova.test(groups = groups, between.var = effect_size,
+                                  within.var = 1, n = floor(n/(2*k+1)/groups),
+                                  sig.level = alpha0, power = NULL)$power
+  ANOVA_pow_1 <- power.anova.test(groups = groups, between.var = effect_size,
+                                  within.var = 1, n = ceiling(n/(2*k+1)/groups),
+                                  sig.level = alpha0, power = NULL)$power
+  ANOVA_pows <- c(rep(ANOVA_pow_1, floor(n/groups - floor(n/(2*k+1)/groups)*(2*k+1))),
+                  rep(ANOVA_pow_0, ceiling(2*k+1 - n/groups + floor(n/(2*k+1)/groups)*(2*k+1))))
+
   power <- 0
   for(t in 0:(2*k+1)){
-    likelihood <- dbinom(t, 2*k+1, ANOVA_pow)
+    likelihood <- dpbinom(t, ANOVA_pows)
     rej_prob <- ppbinom(x = k, probs = c(rep(p, t), rep(1-p, 2*k+1-t)), lower.tail = F)
     power <- power + likelihood*rej_prob
   }
